@@ -1,0 +1,157 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+    <h:head>
+        <title>Gestión de Usuarios</title>
+        <style>
+            /* Estilos de la plantilla ABADDON (Negro, Dorado, Blanco, Plata) */
+            body { font-family: 'Arial', sans-serif; background-color: #1a1a1a; color: #ffffff; padding: 20px; }
+            .main-content { background-color: #000000; padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3); border: 1px solid #D4AF37; margin: auto; max-width: 1200px; }
+            h2 { color: #D4AF37; text-align: center; margin-bottom: 20px; border-bottom: 2px solid #C0C0C0; padding-bottom: 10px; }
+            .ui-button { background-color: #D4AF37 !important; color: #000000 !important; border: none !important; font-weight: bold; transition: background-color 0.3s; }
+            .ui-button:hover { background-color: #ffda6a !important; }
+            .ui-datatable .ui-datatable-header { background-color: #333333; color: #ffffff; }
+            .ui-datatable .ui-datatable-data > tr, .ui-datatable .ui-datatable-data > tr > td { background-color: #1a1a1a !important; color: #C0C0C0 !important; border-color: #333333 !important; }
+            .ui-datatable .ui-datatable-data > tr:hover { background-color: #2a2a2a !important; }
+            .role-admin { color: #D4AF37; font-weight: bold; }
+            .role-employee { color: #C0C0C0; font-weight: bold; }
+            .role-client { color: #ffffff; }
+        </style>
+    </h:head>
+    <h:body onload="#{usuarioBean.listarUsuarios()}">
+        <div class="main-content">
+            <h:form id="formUsuarios">
+                <h2>Gestión de Usuarios del Sistema</h2>
+                
+                <p:growl id="msj" showDetail="true" showSummary="false"/>
+
+                <p:commandButton value="Nuevo Usuario" 
+                                 icon="pi pi-user-plus" 
+                                 oncomplete="PF('dialogoCrear').show()" 
+                                 style="margin-bottom: 15px;"/>
+
+                <p:dataTable id="tablaUsers" 
+                             var="user" 
+                             value="#{usuarioBean.lstUsuarios}" 
+                             widgetVar="usersTable"
+                             emptyMessage="No se encontraron usuarios registrados"
+                             rows="10" 
+                             paginator="true">
+                    
+                    <f:facet name="header">
+                        Usuarios Registrados
+                    </f:facet>
+
+                    <p:column headerText="ID" sortBy="#{user.id}" width="50">
+                        <h:outputText value="#{user.id}"/>
+                    </p:column>
+
+                    <p:column headerText="Nombre" sortBy="#{user.nombre}">
+                        <h:outputText value="#{user.nombre}"/>
+                    </p:column>
+
+                    <p:column headerText="Email" sortBy="#{user.email}">
+                        <h:outputText value="#{user.email}"/>
+                    </p:column>
+                    
+                    <p:column headerText="Rol" sortBy="#{user.rol}" width="150">
+                        <h:outputText value="#{user.rol}" 
+                                      styleClass="role-#{user.rol eq 'ADMINISTRADOR' ? 'admin' : (user.rol eq 'EMPLEADO' ? 'employee' : 'client')}"/>
+                    </p:column>
+                    
+                    <p:column headerText="Estado" width="80">
+                         <h:outputText value="#{user.activo ? 'Activo' : 'Inactivo'}" 
+                                       style="color: #{user.activo ? '#D4AF37' : '#ff4d4d'}; font-weight: bold;"/>
+                    </p:column>
+
+                    <p:column headerText="Acciones" width="150">
+                        <p:commandButton icon="pi pi-pencil" title="Editar" 
+                                         actionListener="#{usuarioBean.buscar(user.id)}"
+                                         oncomplete="PF('dialogoEditar').show()" 
+                                         update=":formEditar" styleClass="ui-button-flat ui-button-secondary" />
+                        
+                        <p:commandButton icon="pi pi-trash" title="Desactivar" 
+                                         actionListener="#{usuarioBean.eliminar(user.id)}"
+                                         update="tablaUsers msj" styleClass="ui-button-flat ui-button-danger" >
+                             <p:confirm header="Confirmación" message="¿Está seguro de desactivar a este usuario?" icon="pi pi-exclamation-triangle"/>
+                        </p:commandButton>
+                    </p:column>
+                </p:dataTable>
+                
+                 <p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
+                    <p:commandButton value="Sí" type="button" styleClass="ui-confirmdialog-yes" icon="pi pi-check" />
+                    <p:commandButton value="No" type="button" styleClass="ui-confirmdialog-no ui-button-secondary" icon="pi pi-times" />
+                </p:confirmDialog>
+            </h:form>
+        </div>
+
+        <p:dialog header="Registrar Nuevo Usuario" widgetVar="dialogoCrear" modal="true" responsive="true" width="500">
+            <h:form id="formCrear">
+                <p:panelGrid columns="2" layout="grid" styleClass="ui-panelgrid-blank">
+                    
+                    <p:outputLabel for="nombre" value="Nombre Completo:" />
+                    <p:inputText id="nombre" value="#{usuarioBean.usuario.nombre}" required="true" />
+                    
+                    <p:outputLabel for="email" value="Email:" />
+                    <p:inputText id="email" value="#{usuarioBean.usuario.email}" required="true" validatorMessage="Formato de email incorrecto.">
+                        <f:validateRegex pattern="[\w\.-]*[a-zA-Z0-9_]@[\w\.-]*[a-zA-Z0-9]\.[a-zA-Z][a-zA-Z\.]*[a-zA-Z]" />
+                    </p:inputText>
+                    
+                    <p:outputLabel for="pass" value="Contraseña:" />
+                    <p:password id="pass" value="#{usuarioBean.usuario.password}" required="true" feedback="true" match="passConf" weakLabel="Débil" goodLabel="Aceptable" strongLabel="Fuerte"/>
+
+                    <p:outputLabel for="passConf" value="Confirmar Contraseña:" />
+                    <p:password id="passConf" required="true" />
+                    
+                    <p:outputLabel for="rol" value="Rol:" />
+                    <p:selectOneMenu id="rol" value="#{usuarioBean.usuario.rol}" required="true">
+                        <f:selectItem itemLabel="Seleccione un Rol" itemValue="" />
+                        <f:selectItem itemLabel="Administrador" itemValue="ADMINISTRADOR" />
+                        <f:selectItem itemLabel="Empleado" itemValue="EMPLEADO" />
+                        <f:selectItem itemLabel="Cliente" itemValue="CLIENTE" />
+                    </p:selectOneMenu>
+
+                </p:panelGrid>
+                
+                <p:commandButton value="Guardar" 
+                                 actionListener="#{usuarioBean.guardar()}" 
+                                 update=":formUsuarios:tablaUsers :formUsuarios:msj" 
+                                 oncomplete="if (!args.validationFailed) PF('dialogoCrear').hide()" 
+                                 style="margin-top: 15px;"/>
+            </h:form>
+        </p:dialog>
+
+        <p:dialog header="Editar Usuario" widgetVar="dialogoEditar" modal="true" responsive="true" width="500">
+            <h:form id="formEditar">
+                <p:panelGrid columns="2" layout="grid" styleClass="ui-panelgrid-blank">
+                    
+                    <p:outputLabel value="ID:" />
+                    <h:outputText value="#{usuarioBean.usuario.id}" style="font-weight: bold; color: #D4AF37;"/>
+                    
+                    <p:outputLabel for="nombreEdit" value="Nombre Completo:" />
+                    <p:inputText id="nombreEdit" value="#{usuarioBean.usuario.nombre}" required="true" />
+                    
+                    <p:outputLabel for="emailEdit" value="Email:" />
+                    <p:inputText id="emailEdit" value="#{usuarioBean.usuario.email}" required="true" />
+                    
+                    <p:outputLabel for="rolEdit" value="Rol:" />
+                    <p:selectOneMenu id="rolEdit" value="#{usuarioBean.usuario.rol}" required="true">
+                        <f:selectItem itemLabel="Administrador" itemValue="ADMINISTRADOR" />
+                        <f:selectItem itemLabel="Empleado" itemValue="EMPLEADO" />
+                        <f:selectItem itemLabel="Cliente" itemValue="CLIENTE" />
+                    </p:selectOneMenu>
+                    
+                </p:panelGrid>
+                
+                <p:commandButton value="Actualizar" 
+                                 actionListener="#{usuarioBean.actualizar()}" 
+                                 update=":formUsuarios:tablaUsers :formUsuarios:msj" 
+                                 oncomplete="if (!args.validationFailed) PF('dialogoEditar').hide()" 
+                                 style="margin-top: 15px;"/>
+            </h:form>
+        </p:dialog>
+    </h:body>
+</html>

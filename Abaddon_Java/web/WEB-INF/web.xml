@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app version="3.1" xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd">
+
+    <servlet>
+        <servlet-name>Faces Servlet</servlet-name>
+        <servlet-class>javax.faces.webapp.FacesServlet</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    
+    <welcome-file-list>
+        <welcome-file>faces/index.xhtml</welcome-file>
+    </welcome-file-list>
+    
+    <servlet-mapping>
+        <servlet-name>Faces Servlet</servlet-name>
+        <url-pattern>/faces/*</url-pattern>
+    </servlet-mapping>
+
+    <session-config>
+        <session-timeout>
+            30
+        </session-timeout>
+    </session-config>
+    
+    <security-constraint>
+        <web-resource-collection>
+            <web-resource-name>Protected Dashboards</web-resource-name>
+            <url-pattern>/faces/dashboard/*</url-pattern>
+        </web-resource-collection>
+        <auth-constraint>
+            <role-name>ADMINISTRADOR</role-name>
+            <role-name>EMPLEADO</role-name>
+            <role-name>CLIENTE</role-name>
+        </auth-constraint>
+        <user-data-constraint>
+            <transport-guarantee>NONE</transport-guarantee>
+        </user-data-constraint>
+    </security-constraint>
+    
+    <security-constraint>
+        <web-resource-collection>
+            <web-resource-name>Gestion Pages</web-resource-name>
+            <url-pattern>/faces/productos.xhtml</url-pattern>
+            <url-pattern>/faces/tipos_producto.xhtml</url-pattern>
+            <url-pattern>/faces/metodos_pago.xhtml</url-pattern>
+            <url-pattern>/faces/usuarios.xhtml</url-pattern>
+            <url-pattern>/faces/ventas.xhtml</url-pattern>
+        </web-resource-collection>
+        <auth-constraint>
+            <role-name>ADMINISTRADOR</role-name>
+            <role-name>EMPLEADO</role-name>
+        </auth-constraint>
+    </security-constraint>
+    
+    <error-page>
+        <error-code>403</error-code>
+        <location>/faces/noaccess.xhtml</location>
+    </error-page>
+
+    <security-role>
+        <role-name>ADMINISTRADOR</role-name>
+    </security-role>
+    <security-role>
+        <role-name>EMPLEADO</role-name>
+    </security-role>
+    <security-role>
+        <role-name>CLIENTE</role-name>
+    </security-role>
+
+</web-app>

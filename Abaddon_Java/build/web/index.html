@@ -1,0 +1,88 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui">
+    <h:head>
+        <title>ABADDON - Inicio de Sesión</title>
+        <style>
+            /* Estilos de la Paleta ABADDON (Negro, Dorado, Blanco) */
+            body {
+                font-family: 'Arial', sans-serif;
+                background-color: #1a1a1a; /* Fondo Oscuro */
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
+                margin: 0;
+            }
+            .login-container {
+                background-color: #000000; /* Negro Puro */
+                padding: 40px;
+                border-radius: 10px;
+                box-shadow: 0 0 20px rgba(212, 175, 55, 0.5); /* Sombra Dorada */
+                border: 2px solid #D4AF37; /* Borde Dorado */
+                width: 350px;
+                text-align: center;
+            }
+            .login-container h2 {
+                color: #D4AF37; /* Título Dorado */
+                margin-bottom: 30px;
+                font-size: 1.8em;
+                text-transform: uppercase;
+                letter-spacing: 2px;
+            }
+            /* Estilo para los inputs de PrimeFaces */
+            .ui-inputfield {
+                width: 100%;
+                box-sizing: border-box;
+                margin-bottom: 15px;
+                background-color: #333333 !important; /* Fondo del input Plata Oscuro */
+                color: #ffffff !important;
+                border: 1px solid #555555 !important;
+            }
+            /* Estilo del Botón de Login (Dorado y Negro) */
+            .ui-button.login-button {
+                width: 100%;
+                background-color: #D4AF37 !important;
+                color: #000000 !important;
+                border: none !important;
+                font-weight: bold;
+                padding: 10px;
+                font-size: 1.1em;
+                transition: background-color 0.3s;
+            }
+            .ui-button.login-button:hover {
+                background-color: #ffda6a !important;
+            }
+        </style>
+    </h:head>
+    <h:body>
+        <div class="login-container">
+            <h2>ABADDON LOGIN</h2>
+            <h:form>
+                <p:growl id="msgs" showDetail="true" showSummary="false" life="5000" />
+
+                <p:inputText id="email" 
+                             value="#{loginBean.usuario.email}" 
+                             placeholder="Email de Usuario" 
+                             required="true" 
+                             requiredMessage="El email es obligatorio"
+                             styleClass="ui-inputfield" />
+
+                <p:password id="password" 
+                            value="#{loginBean.usuario.password}" 
+                            placeholder="Contraseña" 
+                            required="true" 
+                            requiredMessage="La contraseña es obligatoria"
+                            feedback="false" 
+                            styleClass="ui-inputfield" />
+
+                <p:commandButton value="Iniciar Sesión" 
+                                 action="#{loginBean.autenticar()}" 
+                                 ajax="false" 
+                                 styleClass="login-button" />
+            </h:form>
+        </div>
+    </h:body>
+</html>

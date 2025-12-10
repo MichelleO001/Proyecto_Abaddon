@@ -1,0 +1,146 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+    <h:head>
+        <title>Consulta de Ventas</title>
+        <style>
+            /* Estilos de la plantilla ABADDON */
+            body { font-family: 'Arial', sans-serif; background-color: #1a1a1a; color: #ffffff; padding: 20px; }
+            .main-content { background-color: #000000; padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3); border: 1px solid #D4AF37; margin: auto; max-width: 1300px; }
+            h2 { color: #D4AF37; text-align: center; margin-bottom: 20px; border-bottom: 2px solid #C0C0C0; padding-bottom: 10px; }
+            .ui-button { background-color: #D4AF37 !important; color: #000000 !important; border: none !important; font-weight: bold; }
+            .ui-datatable .ui-datatable-data > tr, .ui-datatable .ui-datatable-data > tr > td { background-color: #1a1a1a !important; color: #C0C0C0 !important; border-color: #333333 !important; }
+            
+            .status-completada { color: #66ff66; font-weight: bold; } /* Verde claro */
+            .status-pendiente { color: #D4AF37; font-weight: bold; } /* Dorado */
+            .status-cancelada { color: #ff4d4d; font-weight: bold; } /* Rojo */
+        </style>
+    </h:head>
+    <h:body onload="#{ventaBean.listarVentas()}">
+        <div class="main-content">
+            <h:form id="formVentas">
+                <h2>Consulta y Gestión de Ventas</h2>
+                
+                <p:growl id="msj" showDetail="true" showSummary="false"/>
+
+                <p:dataTable id="tablaVentas" 
+                             var="venta" 
+                             value="#{ventaBean.lstVentas}" 
+                             widgetVar="ventasTable"
+                             emptyMessage="No se encontraron ventas"
+                             rows="10" 
+                             paginator="true">
+                    
+                    <f:facet name="header">
+                        Transacciones Realizadas
+                    </f:facet>
+                    
+                    <p:column headerText="ID" sortBy="#{venta.id}" width="50">
+                        <h:outputText value="#{venta.id}"/>
+                    </p:column>
+
+                    <p:column headerText="Fecha" sortBy="#{venta.fechaVenta}" width="150">
+                        <h:outputText value="#{venta.fechaVenta}">
+                             <f:convertDateTime pattern="dd/MM/yyyy HH:mm"/>
+                        </h:outputText>
+                    </p:column>
+                    
+                    <p:column headerText="Cliente" sortBy="#{venta.cliente.nombre}">
+                        <h:outputText value="#{venta.cliente.nombre}"/>
+                    </p:column>
+                    
+                    <p:column headerText="Vendedor" sortBy="#{venta.vendedor.nombre}" width="150">
+                        <h:outputText value="#{venta.vendedor.nombre}"/>
+                    </p:column>
+
+                    <p:column headerText="Total" sortBy="#{venta.totalVenta}" width="100">
+                        <h:outputText value="#{venta.totalVenta}">
+                             <f:convertNumber type="currency" currencySymbol="$" locale="es_CO"/>
+                        </h:outputText>
+                    </p:column>
+                    
+                    <p:column headerText="Estado" sortBy="#{venta.estadoVenta}" width="100">
+                        <h:outputText value="#{venta.estadoVenta}" 
+                                      styleClass="status-#{venta.estadoVenta.toLowerCase()}"/>
+                    </p:column>
+
+                    <p:column headerText="Detalles" width="100">
+                        <p:commandButton icon="pi pi-eye" title="Ver Detalles" 
+                                         actionListener="#{ventaBean.buscar(venta.id)}"
+                                         oncomplete="PF('dialogoDetalle').show()" 
+                                         update=":formDetalle" styleClass="ui-button-flat ui-button-info" />
+                    </p:column>
+                    
+                    <p:column headerText="Acciones" width="100">
+                        <p:commandButton icon="pi pi-times-circle" title="Cancelar Venta" 
+                                         actionListener="#{ventaBean.cancelarVenta(venta.id)}"
+                                         rendered="#{venta.estadoVenta eq 'PENDIENTE'}"
+                                         update="tablaVentas msj" styleClass="ui-button-flat ui-button-danger" >
+                             <p:confirm header="Confirmación" message="¿Desea cambiar el estado a CANCELADA?" icon="pi pi-exclamation-triangle"/>
+                        </p:commandButton>
+                    </p:column>
+                </p:dataTable>
+                
+                 <p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
+                    <p:commandButton value="Sí" type="button" styleClass="ui-confirmdialog-yes" icon="pi pi-check" />
+                    <p:commandButton value="No" type="button" styleClass="ui-confirmdialog-no ui-button-secondary" icon="pi pi-times" />
+                </p:confirmDialog>
+            </h:form>
+        </div>
+
+        <p:dialog header="Detalles de Venta ID: #{ventaBean.venta.id}" widgetVar="dialogoDetalle" modal="true" responsive="true" width="800">
+            <h:form id="formDetalle">
+                
+                <p:panelGrid columns="4" layout="grid" styleClass="ui-panelgrid-blank" style="margin-bottom: 20px;">
+                    <h:outputText value="Cliente:" style="font-weight: bold; color: #C0C0C0;"/>
+                    <h:outputText value="#{ventaBean.venta.cliente.nombre}" style="color: #ffffff;"/>
+                    
+                    <h:outputText value="Vendedor:" style="font-weight: bold; color: #C0C0C0;"/>
+                    <h:outputText value="#{ventaBean.venta.vendedor.nombre}" style="color: #ffffff;"/>
+                    
+                    <h:outputText value="Fecha Venta:" style="font-weight: bold; color: #C0C0C0;"/>
+                    <h:outputText value="#{ventaBean.venta.fechaVenta}">
+                        <f:convertDateTime pattern="dd/MM/yyyy HH:mm"/>
+                    </h:outputText>
+                    
+                    <h:outputText value="Estado:" style="font-weight: bold; color: #C0C0C0;"/>
+                    <h:outputText value="#{ventaBean.venta.estadoVenta}" styleClass="status-#{ventaBean.venta.estadoVenta.toLowerCase()}"/>
+                </p:panelGrid>
+                
+                <h3>Productos Vendidos (Detalles)</h3>
+                <p:dataTable value="#{ventaBean.venta.detalles}" var="detalle" emptyMessage="No hay detalles para esta venta">
+                    <p:column headerText="Producto">
+                        <h:outputText value="#{detalle.producto.nombre}"/>
+                    </p:column>
+                    
+                    <p:column headerText="Cantidad" width="80">
+                        <h:outputText value="#{detalle.cantidad}"/>
+                    </p:column>
+                    
+                    <p:column headerText="Precio Unitario" width="120">
+                        <h:outputText value="#{detalle.precioUnitario}">
+                            <f:convertNumber type="currency" currencySymbol="$" locale="es_CO"/>
+                        </h:outputText>
+                    </p:column>
+                    
+                    <p:column headerText="Subtotal" width="120">
+                        <h:outputText value="#{detalle.subtotal}">
+                            <f:convertNumber type="currency" currencySymbol="$" locale="es_CO"/>
+                        </h:outputText>
+                    </p:column>
+                </p:dataTable>
+                
+                <h:panelGrid columns="2" style="float: right; margin-top: 15px;">
+                    <h:outputText value="TOTAL DE VENTA:" style="font-weight: bold; color: #D4AF37; font-size: 1.2em;"/>
+                    <h:outputText value="#{ventaBean.venta.totalVenta}" style="font-weight: bold; color: #D4AF37; font-size: 1.2em;">
+                        <f:convertNumber type="currency" currencySymbol="$" locale="es_CO"/>
+                    </h:outputText>
+                </h:panelGrid>
+
+            </h:form>
+        </p:dialog>
+    </h:body>
+</html>

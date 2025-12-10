@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+    <h:head>
+        <title><ui:insert name="titulo">Abaddon - Dashboard</ui:insert></title>
+        <style>
+            /* Estilos de la plantilla ABADDON (Negro, Dorado, Blanco, Plata) */
+            body { font-family: 'Arial', sans-serif; background-color: #1a1a1a; color: #ffffff; }
+            #topbar { background-color: #000000; color: #D4AF37; padding: 10px 20px; border-bottom: 3px solid #D4AF37; display: flex; justify-content: space-between; align-items: center; }
+            #topbar h1 { margin: 0; font-size: 1.5em; }
+            #sidebar { background-color: #333333; padding: 15px 0; width: 250px; position: fixed; height: 100%; overflow: auto; border-right: 1px solid #C0C0C0; }
+            #content { margin-left: 270px; padding: 20px; }
+            .user-info { color: #C0C0C0; font-size: 0.9em; margin-right: 15px; }
+            .ui-menuitem-link { color: #ffffff !important; transition: all 0.3s; }
+            .ui-menuitem-link:hover { background-color: #D4AF37 !important; color: #000000 !important; }
+            .ui-menu .ui-menu-parent > a, .ui-menu .ui-menuitem-link { border-bottom: 1px solid #555; }
+        </style>
+    </h:head>
+    <h:body>
+        <div id="topbar">
+            <h1>ABADDON | <ui:insert name="rolTitle">Sistema de Gestión</ui:insert></h1>
+            <h:form>
+                <h:outputText styleClass="user-info" value="Bienvenido, #{loginBean.nombreUsuario} - Rol: #{loginBean.usuario.rol}"/>
+                <p:commandButton value="Cerrar Sesión" 
+                                 action="#{loginBean.cerrar()}" 
+                                 icon="pi pi-sign-out" 
+                                 style="background-color: #C0C0C0 !important; color: #000000 !important;"/>
+            </h:form>
+        </div>
+
+        <div id="sidebar">
+            <h:form>
+                <p:menu>
+                    <ui:insert name="menuLateral"/>
+                </p:menu>
+            </h:form>
+        </div>
+
+        <div id="content">
+            <ui:insert name="contenido"/>
+        </div>
+    </h:body>
+</html>

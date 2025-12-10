@@ -1,0 +1,122 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+    <h:head>
+        <title>Gestión de Métodos de Pago</title>
+        <style>
+            body { font-family: 'Arial', sans-serif; background-color: #1a1a1a; color: #ffffff; padding: 20px; }
+            .main-content { background-color: #000000; padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3); border: 1px solid #D4AF37; margin: auto; max-width: 800px; }
+            h2 { color: #D4AF37; text-align: center; margin-bottom: 20px; border-bottom: 2px solid #C0C0C0; padding-bottom: 10px; }
+            .ui-button { background-color: #D4AF37 !important; color: #000000 !important; border: none !important; font-weight: bold; transition: background-color 0.3s; }
+            .ui-button:hover { background-color: #ffda6a !important; }
+            .ui-datatable .ui-datatable-header { background-color: #333333; color: #ffffff; }
+            .ui-datatable .ui-datatable-data > tr, .ui-datatable .ui-datatable-data > tr > td { background-color: #1a1a1a !important; color: #C0C0C0 !important; border-color: #333333 !important; }
+            .ui-datatable .ui-datatable-data > tr:hover { background-color: #2a2a2a !important; }
+        </style>
+    </h:head>
+    <h:body onload="#{metodoPagoBean.listarMetodosPago()}">
+        <div class="main-content">
+            <h:form id="formMetodos">
+                <h2>Gestión de Métodos de Pago</h2>
+                
+                <p:growl id="msj" showDetail="true" showSummary="false"/>
+
+                <p:commandButton value="Nuevo Método de Pago" 
+                                 icon="pi pi-plus" 
+                                 oncomplete="PF('dialogoCrear').show()" 
+                                 style="margin-bottom: 15px;"/>
+
+                <p:dataTable id="tablaMetodos" 
+                             var="mp" 
+                             value="#{metodoPagoBean.lstMetodosPago}" 
+                             widgetVar="metodosTable"
+                             emptyMessage="No se encontraron métodos de pago"
+                             rows="5" 
+                             paginator="true">
+                    
+                    <f:facet name="header">
+                        Métodos de Pago Habilitados
+                    </f:facet>
+
+                    <p:column headerText="ID" sortBy="#{mp.id}" width="50">
+                        <h:outputText value="#{mp.id}"/>
+                    </p:column>
+
+                    <p:column headerText="Nombre" sortBy="#{mp.nombre}">
+                        <h:outputText value="#{mp.nombre}"/>
+                    </p:column>
+
+                    <p:column headerText="Descripción">
+                        <h:outputText value="#{mp.descripcion}"/>
+                    </p:column>
+                    
+                    <p:column headerText="Estado" width="80">
+                         <h:outputText value="#{mp.activo ? 'Activo' : 'Inactivo'}" 
+                                       style="color: #{mp.activo ? '#D4AF37' : '#C0C0C0'}; font-weight: bold;"/>
+                    </p:column>
+
+                    <p:column headerText="Acciones" width="150">
+                        <p:commandButton icon="pi pi-pencil" title="Editar" 
+                                         actionListener="#{metodoPagoBean.buscar(mp.id)}"
+                                         oncomplete="PF('dialogoEditar').show()" 
+                                         update=":formEditar" styleClass="ui-button-flat ui-button-secondary" />
+                        
+                        <p:commandButton icon="pi pi-trash" title="Desactivar" 
+                                         actionListener="#{metodoPagoBean.eliminar(mp.id)}"
+                                         update="tablaMetodos msj" styleClass="ui-button-flat ui-button-danger" >
+                             <p:confirm header="Confirmación" message="¿Está seguro de desactivar este método de pago?" icon="pi pi-exclamation-triangle"/>
+                        </p:commandButton>
+                    </p:column>
+                </p:dataTable>
+                
+                 <p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
+                    <p:commandButton value="Sí" type="button" styleClass="ui-confirmdialog-yes" icon="pi pi-check" />
+                    <p:commandButton value="No" type="button" styleClass="ui-confirmdialog-no ui-button-secondary" icon="pi pi-times" />
+                </p:confirmDialog>
+            </h:form>
+        </div>
+
+        <p:dialog header="Registrar Nuevo Método de Pago" widgetVar="dialogoCrear" modal="true" responsive="true">
+            <h:form id="formCrear">
+                <p:panelGrid columns="2" layout="grid" styleClass="ui-panelgrid-blank">
+                    <p:outputLabel for="nombre" value="Nombre:" />
+                    <p:inputText id="nombre" value="#{metodoPagoBean.metodoPago.nombre}" required="true" />
+                    
+                    <p:outputLabel for="desc" value="Descripción:" />
+                    <p:inputTextarea id="desc" value="#{metodoPagoBean.metodoPago.descripcion}" rows="3" />
+                </p:panelGrid>
+                
+                <p:commandButton value="Guardar" 
+                                 actionListener="#{metodoPagoBean.guardar()}" 
+                                 update=":formMetodos:tablaMetodos :formMetodos:msj" 
+                                 oncomplete="if (!args.validationFailed) PF('dialogoCrear').hide()" 
+                                 style="margin-top: 15px;"/>
+            </h:form>
+        </p:dialog>
+
+        <p:dialog header="Editar Método de Pago" widgetVar="dialogoEditar" modal="true" responsive="true">
+            <h:form id="formEditar">
+                <p:panelGrid columns="2" layout="grid" styleClass="ui-panelgrid-blank">
+                    <p:outputLabel value="ID:" />
+                    <h:outputText value="#{metodoPagoBean.metodoPago.id}" style="font-weight: bold; color: #D4AF37;"/>
+                    
+                    <p:outputLabel for="nombreEdit" value="Nombre:" />
+                    <p:inputText id="nombreEdit" value="#{metodoPagoBean.metodoPago.nombre}" required="true" />
+                    
+                    <p:outputLabel for="descEdit" value="Descripción:" />
+                    <p:inputTextarea id="descEdit" value="#{metodoPagoBean.metodoPago.descripcion}" rows="3" />
+                </p:panelGrid>
+                
+                <p:commandButton value="Actualizar" 
+                                 actionListener="#{metodoPagoBean.actualizar()}" 
+                                 update=":formMetodos:tablaMetodos :formMetodos:msj" 
+                                 oncomplete="if (!args.validationFailed) PF('dialogoEditar').hide()" 
+                                 style="margin-top: 15px;"/>
+            </h:form>
+        </p:dialog>
+
+    </h:body>
+</html>

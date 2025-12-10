@@ -1,0 +1,40 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="./template.xhtml"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"> <f:metadata>
+        <f:event type="preRenderView" listener="#{loginBean.verifAdmin()}"/>
+    </f:metadata>
+    
+    <ui:define name="titulo">Dashboard Administrador</ui:define>
+    <ui:define name="rolTitle">ADMINISTRADOR</ui:define>
+
+    <ui:define name="menuLateral">
+        <p:menuitem value="Inicio" icon="pi pi-home" url="/faces/dashboard/admin.xhtml"/>
+        <p:submenu label="Gestión de Inventario" icon="pi pi-briefcase">
+            <p:menuitem value="Productos" icon="pi pi-box" url="/faces/productos.xhtml"/>
+            <p:menuitem value="Tipos de Producto" icon="pi pi-tags" url="/faces/tipos_producto.xhtml"/>
+        </p:submenu>
+        
+        <p:submenu label="Gestión de Ventas" icon="pi pi-chart-bar">
+            <p:menuitem value="Consultar Ventas" icon="pi pi-file-excel" url="/faces/ventas.xhtml"/>
+            <p:menuitem value="Métodos de Pago" icon="pi pi-credit-card" url="/faces/metodos_pago.xhtml"/>
+        </p:submenu>
+        
+        <p:submenu label="Administración de Usuarios" icon="pi pi-users">
+            <p:menuitem value="Usuarios y Roles" icon="pi pi-user-edit" url="/faces/usuarios.xhtml"/>
+        </p:submenu>
+        
+        <p:submenu label="Configuración del Sistema" icon="pi pi-cog">
+            <p:menuitem value="Respaldo y Config" icon="pi pi-database" url="#"/>
+        </p:submenu>
+    </ui:define>
+
+    <ui:define name="contenido">
+        <p:panel header="Bienvenido al Panel de Administración" style="border: 1px solid #D4AF37;">
+            <h:outputText value="Tienes control total sobre el sistema ABADDON (CRUD en todas las entidades)." />
+        </p:panel>
+        </ui:define>
+</ui:composition>

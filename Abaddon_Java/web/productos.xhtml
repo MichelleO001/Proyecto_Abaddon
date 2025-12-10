@@ -1,0 +1,174 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:pt="http://xmlns.jcp.org/jsf/passthrough">
+    <h:head>
+        <title>Gestión de Productos</title>
+        <style>
+            body { font-family: 'Arial', sans-serif; background-color: #1a1a1a; color: #ffffff; padding: 20px; }
+            .main-content { background-color: #000000; padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3); border: 1px solid #D4AF37; margin: auto; max-width: 1200px; }
+            h2 { color: #D4AF37; text-align: center; margin-bottom: 20px; border-bottom: 2px solid #C0C0C0; padding-bottom: 10px; }
+            .ui-button { background-color: #D4AF37 !important; color: #000000 !important; border: none !important; font-weight: bold; transition: background-color 0.3s; }
+            .ui-button:hover { background-color: #ffda6a !important; }
+            .ui-datatable .ui-datatable-header { background-color: #333333; color: #ffffff; }
+            .ui-datatable .ui-datatable-data > tr, .ui-datatable .ui-datatable-data > tr > td { background-color: #1a1a1a !important; color: #C0C0C0 !important; border-color: #333333 !important; }
+            .ui-datatable .ui-datatable-data > tr:hover { background-color: #2a2a2a !important; }
+            .stock-low { color: #ff4d4d; font-weight: bold; } /* Rojo para stock bajo */
+        </style>
+    </h:head>
+    <h:body onload="#{productoBean.listarProds(); productoBean.listarTiposProd()}">
+        <div class="main-content">
+            <h:form id="formProductos" enctype="multipart/form-data">
+                <h2>Gestión de Inventario de Productos</h2>
+                
+                <p:growl id="msj" showDetail="true" showSummary="false"/>
+
+                <p:commandButton value="Nuevo Producto" 
+                                 icon="pi pi-plus" 
+                                 oncomplete="PF('dialogoCrear').show()" 
+                                 style="margin-bottom: 15px;"/>
+
+                <p:dataTable id="tablaProds" 
+                             var="prod" 
+                             value="#{productoBean.lstProds}" 
+                             widgetVar="prodsTable"
+                             emptyMessage="No se encontraron productos"
+                             rows="10" 
+                             paginator="true">
+                    
+                    <f:facet name="header">
+                        Productos Registrados
+                    </f:facet>
+
+                    <p:column headerText="ID" sortBy="#{prod.id}" width="50">
+                        <h:outputText value="#{prod.id}"/>
+                    </p:column>
+                    
+                    <p:column headerText="Imagen" width="80">
+                        <h:graphicImage value="#{prod.imagen}" width="60" style="border-radius: 4px;"/>
+                    </p:column>
+
+                    <p:column headerText="Nombre" sortBy="#{prod.nombre}">
+                        <h:outputText value="#{prod.nombre}"/>
+                    </p:column>
+                    
+                    <p:column headerText="Categoría" sortBy="#{prod.tipoProducto.nombre}">
+                        <h:outputText value="#{prod.tipoProducto.nombre}"/>
+                    </p:column>
+
+                    <p:column headerText="Precio" sortBy="#{prod.precio}" width="100">
+                        <h:outputText value="#{prod.precio}">
+                             <f:convertNumber type="currency" currencySymbol="$" locale="es_CO"/>
+                        </h:outputText>
+                    </p:column>
+                    
+                    <p:column headerText="Stock" sortBy="#{prod.stock}" width="80" style="text-align: center;">
+                        <h:outputText value="#{prod.stock}" 
+                                      styleClass="#{prod.stock lt 5 ? 'stock-low' : ''}"/>
+                    </p:column>
+
+                    <p:column headerText="Acciones" width="150">
+                        <p:commandButton icon="pi pi-pencil" title="Editar" 
+                                         actionListener="#{productoBean.buscar(prod.id)}"
+                                         oncomplete="PF('dialogoEditar').show()" 
+                                         update=":formEditar" styleClass="ui-button-flat ui-button-secondary" />
+                        
+                        <p:commandButton icon="pi pi-trash" title="Desactivar" 
+                                         actionListener="#{productoBean.eliminar(prod.id)}"
+                                         update="tablaProds msj" styleClass="ui-button-flat ui-button-danger" >
+                             <p:confirm header="Confirmación" message="¿Está seguro de desactivar este producto?" icon="pi pi-exclamation-triangle"/>
+                        </p:commandButton>
+                    </p:column>
+                </p:dataTable>
+                
+                 <p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
+                    <p:commandButton value="Sí" type="button" styleClass="ui-confirmdialog-yes" icon="pi pi-check" />
+                    <p:commandButton value="No" type="button" styleClass="ui-confirmdialog-no ui-button-secondary" icon="pi pi-times" />
+                </p:confirmDialog>
+            </h:form>
+        </div>
+
+        <p:dialog header="Registrar Nuevo Producto" widgetVar="dialogoCrear" modal="true" responsive="true" width="500">
+            <h:form id="formCrear" enctype="multipart/form-data">
+                <p:panelGrid columns="2" layout="grid" styleClass="ui-panelgrid-blank">
+                    
+                    <p:outputLabel for="nombre" value="Nombre:" />
+                    <p:inputText id="nombre" value="#{productoBean.prod.nombre}" required="true" />
+                    
+                    <p:outputLabel for="desc" value="Descripción:" />
+                    <p:inputTextarea id="desc" value="#{productoBean.prod.descripcion}" rows="3" />
+                    
+                    <p:outputLabel for="precio" value="Precio ($):" />
+                    <p:inputNumber id="precio" value="#{productoBean.prod.precio}" decimalSeparator="." thousandSeparator="," required="true" />
+                    
+                    <p:outputLabel for="stock" value="Stock Inicial:" />
+                    <p:inputText id="stock" value="#{productoBean.prod.stock}" required="true" />
+                    
+                    <p:outputLabel for="tipo" value="Categoría:" />
+                    <p:selectOneMenu id="tipo" value="#{productoBean.prod.tipoProductoId}" required="true">
+                        <f:selectItem itemLabel="Seleccione Categoría" itemValue="" />
+                        <f:selectItems value="#{productoBean.lstTiposProd}" 
+                                       var="tp" 
+                                       itemLabel="#{tp.nombre}" 
+                                       itemValue="#{tp.id}" />
+                    </p:selectOneMenu>
+                    
+                    <p:outputLabel for="img" value="Imagen (PNG/JPG):" />
+                    <p:fileUpload id="img" value="#{productoBean.imagen}" mode="simple" skinSimple="true" allowTypes="/(\.|\/)(gif|jpe?g|png)$/" />
+
+                </p:panelGrid>
+                
+                <p:commandButton value="Guardar" 
+                                 actionListener="#{productoBean.guardar()}" 
+                                 update=":formProductos:tablaProds :formProductos:msj" 
+                                 oncomplete="if (!args.validationFailed) PF('dialogoCrear').hide()" 
+                                 style="margin-top: 15px;" ajax="false"/> </h:form>
+        </p:dialog>
+
+        <p:dialog header="Editar Producto" widgetVar="dialogoEditar" modal="true" responsive="true" width="500">
+            <h:form id="formEditar" enctype="multipart/form-data">
+                 <p:panelGrid columns="2" layout="grid" styleClass="ui-panelgrid-blank">
+                    
+                    <p:outputLabel value="ID:" />
+                    <h:outputText value="#{productoBean.prod.id}" style="font-weight: bold; color: #D4AF37;"/>
+                    
+                    <p:outputLabel value="Imagen Actual:" />
+                    <h:graphicImage value="#{productoBean.prod.imagen}" width="100" style="border-radius: 4px;"/>
+
+                    <p:outputLabel for="nombreEdit" value="Nombre:" />
+                    <p:inputText id="nombreEdit" value="#{productoBean.prod.nombre}" required="true" />
+                    
+                    <p:outputLabel for="descEdit" value="Descripción:" />
+                    <p:inputTextarea id="descEdit" value="#{productoBean.prod.descripcion}" rows="3" />
+                    
+                    <p:outputLabel for="precioEdit" value="Precio ($):" />
+                    <p:inputNumber id="precioEdit" value="#{productoBean.prod.precio}" decimalSeparator="." thousandSeparator="," required="true" />
+                    
+                    <p:outputLabel for="stockEdit" value="Stock:" />
+                    <p:inputText id="stockEdit" value="#{productoBean.prod.stock}" required="true" />
+                    
+                    <p:outputLabel for="tipoEdit" value="Categoría:" />
+                    <p:selectOneMenu id="tipoEdit" value="#{productoBean.prod.tipoProductoId}" required="true">
+                        <f:selectItems value="#{productoBean.lstTiposProd}" 
+                                       var="tp" 
+                                       itemLabel="#{tp.nombre}" 
+                                       itemValue="#{tp.id}" />
+                    </p:selectOneMenu>
+                    
+                    <p:outputLabel for="imgEdit" value="Reemplazar Imagen:" />
+                    <p:fileUpload id="imgEdit" value="#{productoBean.imagen}" mode="simple" skinSimple="true" allowTypes="/(\.|\/)(gif|jpe?g|png)$/" />
+
+                </p:panelGrid>
+                
+                <p:commandButton value="Actualizar" 
+                                 actionListener="#{productoBean.actualizar()}" 
+                                 update=":formProductos:tablaProds :formProductos:msj" 
+                                 oncomplete="if (!args.validationFailed) PF('dialogoEditar').hide()" 
+                                 style="margin-top: 15px;" ajax="false"/>
+            </h:form>
+        </p:dialog>
+    </h:body>
+</html>

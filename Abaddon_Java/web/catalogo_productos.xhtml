@@ -1,0 +1,131 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+    
+    <h:head>
+        <title>Catálogo de Productos</title>
+        <style>
+            /* Estilos ABADDON para el Catálogo */
+            .product-card {
+                background-color: #1a1a1a; /* Negro Oscuro */
+                border: 1px solid #333;
+                padding: 15px;
+                border-radius: 5px;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+                transition: transform 0.3s, box-shadow 0.3s;
+                height: 100%;
+                display: flex;
+                flex-direction: column;
+            }
+            .product-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 6px 15px rgba(212, 175, 55, 0.5); /* Efecto Hover Dorado */
+                border-color: #D4AF37;
+            }
+            .product-image {
+                width: 100%;
+                height: 200px; /* Altura fija para uniformidad */
+                object-fit: cover;
+                border-radius: 4px;
+                margin-bottom: 10px;
+                border: 1px solid #555;
+            }
+            .product-name {
+                color: #D4AF37; /* Dorado */
+                font-size: 1.2em;
+                font-weight: bold;
+                margin-bottom: 5px;
+            }
+            .product-price {
+                color: #ffffff;
+                font-size: 1.4em;
+                font-weight: bold;
+                margin-top: auto; /* Empuja el precio y el botón hacia abajo */
+            }
+            .product-description {
+                color: #C0C0C0; /* Plata */
+                font-size: 0.9em;
+                margin-bottom: 10px;
+                flex-grow: 1; /* Permite que la descripción ocupe el espacio restante */
+            }
+            /* Botón de Acción (Agregar al Carrito, Ver Detalle, etc.) */
+            .ui-button.action-button {
+                background-color: #D4AF37 !important;
+                color: #000000 !important;
+                border: none !important;
+                margin-top: 10px;
+                width: 100%;
+            }
+        </style>
+    </h:head>
+    
+    <h:body onload="#{productoBean.listarProds()}"> 
+        
+        <p:panel header="Catálogo ABADDON - Exclusividad y Calidad" style="border: 1px solid #D4AF37; background-color: #0a0a0a;">
+            
+            <h:form id="formCatalogo">
+                <p:growl id="msj" showDetail="true" showSummary="false"/>
+
+                <p:toolbar style="margin-bottom: 20px; border: 1px solid #333;">
+                    <f:facet name="left">
+                        <p:inputText value="#{productoBean.filtroNombre}" 
+                                     placeholder="Buscar por Nombre..." 
+                                     style="width: 250px; background-color: #333; color: #fff;"
+                                     onkeyup="PF('dataViewWidget').filter()"/>
+                        
+                        <p:selectOneMenu value="#{productoBean.filtroTipoProductoId}" style="margin-left: 10px; background-color: #333;">
+                            <f:selectItem itemLabel="Todas las Categorías" itemValue=""/>
+                            <f:selectItems value="#{productoBean.lstTiposProd}" var="tp" itemLabel="#{tp.nombre}" itemValue="#{tp.id}"/>
+                            <p:ajax update="@form:dataView" listener="#{productoBean.filtrarCatalogo()}"/>
+                        </p:selectOneMenu>
+                    </f:facet>
+                </p:toolbar>
+                
+                <p:dataView id="dataView" 
+                            var="prod" 
+                            value="#{productoBean.lstProds}" 
+                            widgetVar="dataViewWidget"
+                            gridIcon="pi pi-th-large" 
+                            listIcon="pi pi-list" 
+                            layout="grid"
+                            rows="8" 
+                            paginator="true"
+                    
+                    <p:outputPanel rendered="#{prod.stock gt 0}">
+                        <p:panelGrid columns="1" style="width: 100%" styleClass="product-card">
+                            
+                            <h:graphicImage value="#{prod.imagen}" alt="#{prod.nombre}" styleClass="product-image" />
+                            
+                            <div style="text-align: left; width: 100%;">
+                                <h:outputText value="#{prod.nombre}" styleClass="product-name"/>
+                                <h:outputText value=" (#{prod.tipoProducto.nombre})" style="color: #C0C0C0; font-size: 0.8em;"/>
+                            </div>
+                            
+                            <h:outputText value="#{prod.descripcion}" styleClass="product-description"/>
+                            
+                            <div style="width: 100%; text-align: right; border-top: 1px solid #333; padding-top: 10px;">
+                                <h:outputText value="#{prod.precio}" styleClass="product-price">
+                                    <f:convertNumber type="currency" currencySymbol="$" locale="es_CO"/>
+                                </h:outputText>
+                                <h:outputText value=" (Stock: #{prod.stock})" style="color: #777; font-size: 0.8em; display: block;"/>
+                            </div>
+                            
+                            <p:commandButton value="#{loginBean.usuario.rol eq 'CLIENTE' ? 'Comprar' : 'Añadir al Carrito'}"
+                                             icon="pi pi-shopping-cart"
+                                             actionListener="#{detalleVentaBean.agregarAlCarrito(prod, 1)}"
+                                             update=":formCatalogo:msj"
+                                             styleClass="action-button"/>
+                            
+                        </p:panelGrid>
+                    </p:outputPanel>
+                    
+                </p:dataView>
+            </h:form>
+        </p:panel>
+        
+    </h:body>
+</html>

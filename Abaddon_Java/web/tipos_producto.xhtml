@@ -1,0 +1,161 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+    <h:head>
+        <title>Gestión de Tipos de Producto</title>
+        <style>
+            /* Estilos Generales y Paleta de Colores (Negro, Dorado, Blanco, Plata) */
+            body {
+                font-family: 'Arial', sans-serif;
+                background-color: #1a1a1a; 
+                color: #ffffff;
+                padding: 20px;
+            }
+            .main-content {
+                background-color: #000000;
+                padding: 30px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+                border: 1px solid #D4AF37;
+                margin: auto;
+                max-width: 1000px;
+            }
+            h2 {
+                color: #D4AF37;
+                text-align: center;
+                margin-bottom: 20px;
+                border-bottom: 2px solid #C0C0C0;
+                padding-bottom: 10px;
+            }
+            /* Botón Dorado (Reutilizado del login) */
+            .ui-button {
+                background-color: #D4AF37 !important;
+                color: #000000 !important;
+                border: none !important;
+                font-weight: bold;
+                transition: background-color 0.3s;
+            }
+            .ui-button:hover {
+                background-color: #ffda6a !important;
+            }
+            /* Estilo de la tabla de datos */
+            .ui-datatable .ui-datatable-header {
+                background-color: #333333;
+                color: #ffffff;
+            }
+            .ui-datatable .ui-datatable-data > tr, .ui-datatable .ui-datatable-data > tr > td {
+                background-color: #1a1a1a !important;
+                color: #C0C0C0 !important;
+                border-color: #333333 !important;
+            }
+            .ui-datatable .ui-datatable-data > tr:hover {
+                background-color: #2a2a2a !important;
+            }
+        </style>
+    </h:head>
+    <h:body>
+        <div class="main-content">
+            <h:form id="formTipos">
+                <h2>Gestión de Tipos de Producto</h2>
+                
+                <p:growl id="msj" showDetail="true" showSummary="false"/>
+
+                <p:commandButton value="Nuevo Tipo de Producto" 
+                                 icon="pi pi-plus" 
+                                 oncomplete="PF('dialogoCrear').show()" 
+                                 style="margin-bottom: 15px;"/>
+
+                <p:dataTable id="tablaTipos" 
+                             var="tp" 
+                             value="#{tipoProductoBean.lstTiposProd}" 
+                             widgetVar="tiposTable"
+                             emptyMessage="No se encontraron tipos de producto"
+                             rows="10" 
+                             paginator="true">
+                    
+                    <f:facet name="header">
+                        Tipos de Producto Registrados
+                    </f:facet>
+
+                    <p:column headerText="ID" sortBy="#{tp.id}" width="50">
+                        <h:outputText value="#{tp.id}"/>
+                    </p:column>
+
+                    <p:column headerText="Nombre" sortBy="#{tp.nombre}">
+                        <h:outputText value="#{tp.nombre}"/>
+                    </p:column>
+
+                    <p:column headerText="Descripción">
+                        <h:outputText value="#{tp.descripcion}"/>
+                    </p:column>
+                    
+                    <p:column headerText="Estado" width="80">
+                         <h:outputText value="#{tp.activo ? 'Activo' : 'Inactivo'}" 
+                                       style="color: #{tp.activo ? '#D4AF37' : '#C0C0C0'}; font-weight: bold;"/>
+                    </p:column>
+
+                    <p:column headerText="Acciones" width="150">
+                        <p:commandButton icon="pi pi-pencil" title="Editar" 
+                                         actionListener="#{tipoProductoBean.buscar(tp.id)}"
+                                         oncomplete="PF('dialogoEditar').show()" 
+                                         update=":formEditar" styleClass="ui-button-flat ui-button-secondary" />
+                        
+                        <p:commandButton icon="pi pi-trash" title="Desactivar" 
+                                         actionListener="#{tipoProductoBean.eliminar(tp.id)}"
+                                         update="tablaTipos msj" styleClass="ui-button-flat ui-button-danger" >
+                             <p:confirm header="Confirmación" message="¿Está seguro de desactivar este tipo de producto?" icon="pi pi-exclamation-triangle"/>
+                        </p:commandButton>
+                    </p:column>
+                </p:dataTable>
+                
+                 <p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
+                    <p:commandButton value="Sí" type="button" styleClass="ui-confirmdialog-yes" icon="pi pi-check" />
+                    <p:commandButton value="No" type="button" styleClass="ui-confirmdialog-no ui-button-secondary" icon="pi pi-times" />
+                </p:confirmDialog>
+            </h:form>
+        </div>
+
+        <p:dialog header="Crear Nuevo Tipo de Producto" widgetVar="dialogoCrear" modal="true" responsive="true">
+            <h:form id="formCrear">
+                <p:panelGrid columns="2" layout="grid" styleClass="ui-panelgrid-blank">
+                    <p:outputLabel for="nombre" value="Nombre:" />
+                    <p:inputText id="nombre" value="#{tipoProductoBean.tipoProd.nombre}" required="true" />
+                    
+                    <p:outputLabel for="desc" value="Descripción:" />
+                    <p:inputTextarea id="desc" value="#{tipoProductoBean.tipoProd.descripcion}" rows="3" />
+                </p:panelGrid>
+                
+                <p:commandButton value="Guardar" 
+                                 actionListener="#{tipoProductoBean.guardar()}" 
+                                 update=":formTipos:tablaTipos :formTipos:msj" 
+                                 oncomplete="if (!args.validationFailed) PF('dialogoCrear').hide()" 
+                                 style="margin-top: 15px;"/>
+            </h:form>
+        </p:dialog>
+
+        <p:dialog header="Editar Tipo de Producto" widgetVar="dialogoEditar" modal="true" responsive="true">
+            <h:form id="formEditar">
+                <p:panelGrid columns="2" layout="grid" styleClass="ui-panelgrid-blank">
+                    <p:outputLabel value="ID:" />
+                    <h:outputText value="#{tipoProductoBean.tipoProd.id}" style="font-weight: bold; color: #D4AF37;"/>
+                    
+                    <p:outputLabel for="nombreEdit" value="Nombre:" />
+                    <p:inputText id="nombreEdit" value="#{tipoProductoBean.tipoProd.nombre}" required="true" />
+                    
+                    <p:outputLabel for="descEdit" value="Descripción:" />
+                    <p:inputTextarea id="descEdit" value="#{tipoProductoBean.tipoProd.descripcion}" rows="3" />
+                </p:panelGrid>
+                
+                <p:commandButton value="Actualizar" 
+                                 actionListener="#{tipoProductoBean.actualizar()}" 
+                                 update=":formTipos:tablaTipos :formTipos:msj" 
+                                 oncomplete="if (!args.validationFailed) PF('dialogoEditar').hide()" 
+                                 style="margin-top: 15px;"/>
+            </h:form>
+        </p:dialog>
+
+    </h:body>
+</html>

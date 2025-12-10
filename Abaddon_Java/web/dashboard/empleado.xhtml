@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="./template.xhtml"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"> 
+    
+    <f:metadata>
+        <f:event type="preRenderView" listener="#{loginBean.verifEmpleado()}"/>
+    </f:metadata>
+    
+    <ui:define name="titulo">Dashboard Empleado</ui:define>
+    <ui:define name="rolTitle">EMPLEADO</ui:define>
+
+    <ui:define name="menuLateral">
+        <p:menuitem value="Inicio" icon="pi pi-home" url="/faces/dashboard/empleado.xhtml"/>
+        <p:submenu label="Operaciones de Venta" icon="pi pi-shopping-cart">
+            <p:menuitem value="Nueva Venta (POS)" icon="pi pi-plus-circle" url="#"/> <p:menuitem value="Consultar Ventas" icon="pi pi-file-excel" url="/faces/ventas.xhtml"/>
+        </p:submenu>
+        
+        <p:submenu label="Consulta de Inventario" icon="pi pi-search">
+            <p:menuitem value="Catálogo de Productos" icon="pi pi-box" url="/faces/productos_consulta.xhtml"/> </p:submenu>
+        
+        <p:menuitem value="Mis Datos" icon="pi pi-user-edit" url="#"/>
+    </ui:define>
+
+    <ui:define name="contenido">
+        <p:panel header="Panel de Operaciones de Empleado" style="border: 1px solid #C0C0C0;">
+            <h:outputText value="Acceso a la creación de ventas y consulta de inventario y transacciones." />
+        </p:panel>
+        </ui:define>
+</ui:composition>
